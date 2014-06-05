@@ -32,7 +32,6 @@ class ConnectionBox < Qt::Widget
 		  Thread.new{saveNewIP}
 		}
 		
-		
 		layout = Qt::GridLayout.new
 		
  		layout.addWidget(@ip_box,1,0)
@@ -68,7 +67,7 @@ class ConnectionBox < Qt::Widget
 	  puts "Writing a value to " + @ip_box.text
 	  begin
 	    SNMP::Manager.open(:host => @ip_box.text) do |manager|
-	      varbind = SNMP::VarBind.new("1.3.6.1.4.1.42138.6.0.0", SNMP::OctetString.new(@new_ip_box.text))
+	      varbind = SNMP::VarBind.new("1.3.6.1.4.1.42138.6.0.0", SNMP::IpAddress.new(@new_ip_box.text))
 	      manager.set(varbind)
 	    end
 	    @connect_button.setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(255, 255, 255)");

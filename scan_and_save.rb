@@ -12,6 +12,18 @@ class ScanAndSave < Qt::Widget
 	def initialize(parent = nil)
 		super
 		@ip = nil
+		
+		@DHCP_off_button = Qt::PushButton.new("DHCP off", self)		
+		@DHCP_on_button = Qt::PushButton.new("DHCP on", self)
+				
+		@DHCP_off_button.connect(SIGNAL(:clicked)) {
+		    Thread.new{dhcp_set(0)}  
+		}
+		
+		@DHCP_on_button.connect(SIGNAL(:clicked)) {
+		    Thread.new{dhcp_set(1)}  
+		}
+		
 		@reload_button = Qt::PushButton.new("Scan and Write", self)
 		@reload_button.set_enabled(false)
 		@reload_button.connect(SIGNAL(:clicked)) {
@@ -26,11 +38,33 @@ class ScanAndSave < Qt::Widget
 		
 		layout = Qt::GridLayout.new
 		
-		layout.addWidget(@reload_button, 0,0)
+		layout.addWidget(@DHCP_on_button,0,0)
+		layout.addWidget(@DHCP_off_button,0,1)
+		
+		layout.addWidget(@reload_button, 1,0)
 		
 		setLayout(layout)
 		
 		
+	end
+	
+	def dhcp_set(val)
+	  puts "Setting DHCP"
+	  SNMPExtension::write_snmp_int(@ip, "1.3.6.1.4.1.42138.6.1.0", val)
+	  reload_DHCP_colors
+	end
+	
+	def reload_DHCP_colors
+	  res = SNMPExtension::read_snmp_oid(@ip, "1.3.6.1.4.1.42138.6.1.0")
+	  if res == 0
+	    @DHCP_on_button.setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(255, 255, 255)");
+	    @DHCP_off_button.setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(255, 255, 255)");
+	  elsif res == 1
+	    @DHCP_on_button.setStyleSheet("background-color: rgb(0, 255, 0); color: rgb(255, 255, 255)");
+	    @DHCP_off_button.setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(255, 255, 255)");
+	  else
+	    puts "Error while setting color of DHCP buttons, returned value: " + res
+	  end
 	end
 
 	def scan_and_save
@@ -117,6 +151,7 @@ class ScanAndSave < Qt::Widget
 	  @reload_button.set_enabled( true )
 	  @ip = val
 	  puts "IP set in ScanAndSave: " + @ip
+	  reload_DHCP_colors
 	end
 	
 

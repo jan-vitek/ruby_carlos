@@ -24,8 +24,31 @@ class SNMPExtension
     write_snmp_oid(ip, oid, val, SNMP::Integer)
   end
   
-  def self.read_snmp_oid
+  def self.read_snmp_oid(ip, oid)
+    ret = "";
+    puts "test"
+#     begin
+#       SNMP::Manager.open(:host => ip) do |manager|
+# 	      response = manager.get(["10.1.1.1 1.3.6.1.4.1.42138.6.1.0"])
+# 	      response.each_varbind do |vb|
+# 		puts "#{vb.name.to_s}  #{vb.value.to_s}  #{vb.value.asn1_type}"
+# 		ret = vb.value
+#               end
+#       end
+#     rescue
+#     end
+    begin
+	    SNMP::Manager.open(:host => ip) do |manager|
+	      response = manager.get(["1.3.6.1.4.1.42138.6.1.0"])
+	      response.each_varbind do |vb|
+		puts "#{vb.name.to_s}  #{vb.value.to_s}  #{vb.value.asn1_type}"
+		ret = vb.value
+	      end
+	    end
+    rescue
+    end
     
+    return ret
   end
   
 end
