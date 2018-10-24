@@ -34,6 +34,7 @@ class SensorInformation < Qt::Widget
 	def to_hash
 	  result = {"port" => @port,
 	            "sensor" => @sensor,
+                "address" => @address_label.text,
 	            "room" => @room_edit.text,
 	            "row" => @row_edit.text,
 	            "rack" => @rack_edit.text,

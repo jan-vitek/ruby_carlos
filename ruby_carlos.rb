@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-$VERBOSE = true; $:.unshift File.dirname($0)
+$:.unshift File.dirname($0)
+#$VERBOSE = true;
 
 require 'thread'
 require 'Qt'
@@ -28,10 +29,20 @@ class MyWidget < Qt::Widget
 	json_scroll.setWidget( json_box )
  	json_scroll.setWidgetResizable( true )
 	
-	connect( connection_box, SIGNAL('ipChanged(QString)'), reload_box, SLOT('setIp(QString)') )
+	connect( connection_box, SIGNAL('ipChanged(QString)'), connection_box, SLOT('setConnected(QString)') )
+    connect( connection_box, SIGNAL('connectionFailed(void)'), connection_box, SLOT('connectionFailed(void)') )
+    connect( connection_box, SIGNAL('newIpSet(void)'), connection_box, SLOT('newIpSet(void)') )
+    connect( connection_box, SIGNAL('newIpFailed(void)'), connection_box, SLOT('newIpFailed(void)') )
+    connect( connection_box, SIGNAL('ipChanged(QString)'), reload_box, SLOT('setIp(QString)') )
 	connect( connection_box, SIGNAL('ipChanged(QString)'), json_box, SLOT('setIp(QString)') )
+    
 	connect( reload_box, SIGNAL('addLineToResult(QString)'), result_area, SLOT('resultAddLine(QString)'))
 	connect( reload_box, SIGNAL('clearResult(void)'), result_area, SLOT('resultClear(void)'))
+    connect( reload_box, SIGNAL('calibrationOK(int)'), reload_box, SLOT('calibrationOK(int)'))
+    connect( reload_box, SIGNAL('calibrationFailed(int)'), reload_box, SLOT('calibrationFailed(int)'))
+    connect( reload_box, SIGNAL('setDHCP(int)'), reload_box, SLOT('setDHCP(int)'))
+    connect( reload_box, SIGNAL('scanningFailed(void)'), reload_box, SLOT('scanningFailed(void)'))
+    connect( reload_box, SIGNAL('scanningFinished(void)'), reload_box, SLOT('scanningFinished(void)'))
 	connect( connection_box, SIGNAL('clearResult(void)'), result_area, SLOT('resultClear(void)'))
 	connect( reload_box, SIGNAL('addressesLoaded(QStringList,int)'), json_box, SLOT('updateAddresses(QStringList,int)'))
 	connect( quit, SIGNAL('clicked()'), json_box, SLOT('saveJson()'))

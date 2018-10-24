@@ -14,6 +14,7 @@ class JsonBox < Qt::Widget
 		@addresses = [[],[],[],[]]
 		@sensors_information = []
 		@ip = ""
+    @snmp_port = ""
 		
 		@layout = Qt::GridLayout.new
 		setLayout(@layout)
@@ -22,37 +23,44 @@ class JsonBox < Qt::Widget
 	end
 	
 	def updateAddresses(addresses,i)
-	  @addresses[i] = addresses 
+      Qt.execute_in_main_thread do
+	    @addresses[i] = addresses
+      end
 	  create_fields if i==3
 	end
 	
 	def create_fields
-	  @addresses.each_with_index do |sensors,i|
-	    sensors.each_with_index do |sensor,j|
-	      @sensors_information.push SensorInformation.new(@parent, i, j, sensor, @layout) unless sensor == "0000000000000000" 
+      Qt.execute_in_main_thread do
+	    @addresses.each_with_index do |sensors,i|
+	      sensors.each_with_index do |sensor,j|
+	        @sensors_information.push SensorInformation.new(@parent, i, j, sensor, @layout) unless sensor == "0000000000000000"
+	      end
 	    end
-	  end
+      end
 	end
 	
 	def clearBox
- 	  @sensors_information.each do |sensor|
- 	    puts "removing"
- 	    sensor.remove_from_layout(@layout)
- 	  end
+      Qt.execute_in_main_thread do
+ 	    @sensors_information.each do |sensor|
+ 	      puts "removing"
+ 	      sensor.remove_from_layout(@layout)
+ 	    end
+      end
 	end
 	
 	def setIp(ip)
-	  @ip = ip
+	  @ip,@snmp_port = ip.split(":")
+    @snmp_port = 161 if @snmp_port.nil?
 	end
 	
 	def saveJson
 	  file_name = Qt::FileDialog.getSaveFileName
-	  file_name += ".json" unless file_name[-5..-1] == ".json"
+	  unless file_name.nil?
+      file_name += ".json" unless file_name[-5..-1] == ".json"
 	  result = {"ip" => @ip, "sensors" => []}
 	  @sensors_information.each do |sensor|
 	    result["sensors"].push sensor.to_hash
 	  end
-	  unless file_name.nil?
 	    File.open(file_name, 'w') do |file|	      
 	      file.write(result.to_json)
 	    end

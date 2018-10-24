@@ -22,11 +22,15 @@ class ResultArea < Qt::Widget
 	end
 
 	def resultAddLine(line)
+        Qt.execute_in_main_thread do
           @result_area.append(line)
+        end
 	end
 	
 	def resultClear
-	  @result_area.clear
+      Qt.execute_in_main_thread do
+	    @result_area.clear
+      end
 	end
 	
 
